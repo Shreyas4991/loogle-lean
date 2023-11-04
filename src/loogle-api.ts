@@ -19,21 +19,22 @@ export function showLoogleSearchBar(context: vscode.ExtensionContext) {
     };
     let inputBox = vscode.window.showInputBox(options);
 
-		inputBox.then((query) => {
-				if (typeof query === 'undefined') {
-					console.log("No query given");
-					return;
-				}
-				else if (query.trimStart() === '') {
-					vscode.window.showErrorMessage("You haven't typed in any query yet");
-					return;	
-				}
-				else {
-					let response = callLoogle(context, query);
-					//console.log(response);
-				}
-				
-			});
+    inputBox.then((query) => {
+            if (typeof query === 'undefined') {
+                console.log("No query given");
+                return;
+            }
+            else if (query.trimStart() === '') {
+                vscode.window.showErrorMessage("You haven't typed in any query yet");
+                return;	
+            }
+            else {
+                vscode.window.showInformationMessage("Querying Loogle! Give me some time");
+                let response = callLoogle(context, query);
+                //console.log(response);
+            }
+            
+        });
 }
 export async function callLoogle(context: vscode.ExtensionContext, query : String) {
     console.log(`log: Loogle called with query ${query}`);
