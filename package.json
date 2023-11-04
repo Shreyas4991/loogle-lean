@@ -1,6 +1,6 @@
 {
   "name": "loogle-lean",
-  "displayName": "loogle-lean",
+  "displayName": "Loogle Lean",
   "description": "This extension implements support for using loogle inside vscode in any lean file",
   "version": "0.0.1",
   "repository": {
