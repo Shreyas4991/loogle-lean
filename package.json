@@ -19,7 +19,8 @@
         "command": "loogle-lean.loogle",
         "title": "Loogle",
         "category": "Lean Loogle",
-        "shortTitle": "Search lean with loogle"
+        "shortTitle": "Search lean with loogle",
+        "icon" :  "$(search)"
       }
     ],
     "keybindings" : [

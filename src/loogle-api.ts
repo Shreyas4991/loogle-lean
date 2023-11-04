@@ -68,9 +68,8 @@ function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
             if ('hits' in message) {
                 let loogleHitList = getHitList(message.hits);
                 let quickPickOpts : vscode.QuickPickOptions = {
-                    title: hitMenuTitle, 
                     canPickMany : false,
-                    placeHolder: "Filter through the responses"
+                    placeHolder: "Filter through the hits"
                 };
                 console.log('hit!!');
                 let quickpick = showHitOptions(context, hitMenuTitle, loogleHitList,quickPickOpts);
@@ -80,7 +79,6 @@ function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
                 let suggestionList = getSuggestionList(message.suggestions);
                 console.log("ERROR!! " + message.error);
                 let quickPickOpts : vscode.QuickPickOptions = {
-                    title: suggestionsMenuTitle, 
                     canPickMany : false,
                     placeHolder : "Filter the suggestions"
                 };
@@ -104,9 +102,7 @@ function handleSuggestion(context: vscode.ExtensionContext, suggestion : string)
     callLoogle(context, suggestion);
 }
 
-function handleHit(context : vscode.ExtensionContext, activeItem: vscode.QuickPickItem) {
-    vscode.window.showInformationMessage(`Insert ${activeItem.label} :: ${activeItem.description} at cursor`);
-}
+
 
 function showHitOptions(
     context : vscode.ExtensionContext, 
@@ -117,9 +113,15 @@ function showHitOptions(
         
         let quickpick = vscode.window.createQuickPick();
         quickpick.items = hitList.map((hit) => {return hit.projectQPI();});
+        quickpick.placeholder = options.placeHolder;
+        
         let urls: any= {};
         for (const hit of hitList) {
             urls[hit.quickPickItem.label] = hit.moduleUri;
+        }
+        let modules: any = {};
+        for (const hit of hitList) {
+            modules[hit.quickPickItem.label] = hit.moduleName;
         }
         quickpick.title = title;
 
@@ -129,7 +131,7 @@ function showHitOptions(
         let acceptDisp = quickpick.onDidAccept((event) => {
             let activeItem = quickpick.activeItems[0];
             console.log("QuickPick: " + quickpick.title);
-            handleHit(context, activeItem);
+            insertOrCopy(activeItem.label, modules[activeItem.label], quickpick);
         });
         let buttonBack = quickpick.onDidTriggerButton((button) => {
             if(button === vscode.QuickInputButtons.Back) {
@@ -139,13 +141,17 @@ function showHitOptions(
         let buttonItemDisp = quickpick.onDidTriggerItemButton((event) => {
             let item = event.item.label;            
             if(event.button.tooltip === insertButtonToolTip) {
-                vscode.window.showInformationMessage(`Insert ${item} at cursor`);
+                insertOrCopy(item, modules[item], quickpick);
             }
             else if (event.button.tooltip === copyButtonToolTip) {
                 vscode.window.showInformationMessage(`Copied ${item} to clipboard`);
+                vscode.env.clipboard.writeText(item);
+                quickpick.hide();
             } 
             else if (event.button.tooltip === docButtonToolTip) {
-                vscode.window.showInformationMessage(`Going to open ${urls[item]} in an external browser`);
+                //vscode.window.showInformationMessage(`Going to open ${urls[item]} in an external browser`);
+                quickpick.hide();
+                vscode.env.openExternal(urls[item]);
             }
             else {
                 vscode.window.showInformationMessage(`Not sure what button that was. Report this on [Zulip](${zulipLinkBugs})`);
@@ -160,6 +166,24 @@ function showHitOptions(
         return quickpick;
 
 }
+
+function insertOrCopy(item: string, module: string, quickpick : vscode.QuickPick<vscode.QuickPickItem>) {
+    let editor = vscode.window.activeTextEditor;
+    if (typeof editor === 'undefined') {
+        console.log('No active editor found. Copying item to clipboard');
+        vscode.window.showInformationMessage(`Copied ${item} to clipboard`);
+        vscode.env.clipboard.writeText(item);   
+    }
+    else {
+        let activePosition = editor.selection.active;
+        console.log(`Inserting result at ${activePosition.character}, ${activePosition.line}`);
+        editor.edit((editBuilder) => {
+            editBuilder.insert(activePosition, item);
+        });
+    }
+    quickpick.hide();
+}
+
 function showSuggestionOptions(
     context : vscode.ExtensionContext,  
     title : string, 
@@ -169,6 +193,9 @@ function showSuggestionOptions(
         let quickpick = vscode.window.createQuickPick();
         quickpick.items = suggestList;
         quickpick.title = title;
+        quickpick.placeholder = options.placeHolder;
+        
+
         let backbutton = vscode.QuickInputButtons.Back;
         quickpick.buttons = [backbutton];
         let acceptDisp = quickpick.onDidAccept((event) => {
@@ -187,16 +214,6 @@ function showSuggestionOptions(
         context.subscriptions.push(buttonBack);
         return quickpick;
 }
-
-
-
-function constructMathlibDocURI(hit : HitObject) {
-    let moduleName = hit.module;
-    let modulePath = moduleName.replace('.','/').concat('.html').concat(`/#${moduleName}`);
-    let moduleUri = mathlibDocsURI.concat(modulePath);
-    return moduleUri;
-}
-
 
 interface HitObject {
     name : string;
@@ -219,7 +236,7 @@ class LoogleHit {
         let docUrl : string = "https://leanprover-community.github.io/mathlib4_docs/";
         this.quickPickItem = new LoogleHitItem(hitObject);
         this.moduleName = hitObject.module;
-        let modulePath = this.moduleName.replace('.','/').concat('.html').concat(`/#${this.moduleName}`);
+        let modulePath = this.moduleName.replace(/\./g,'/').concat('.html').concat(`#${this.moduleName}`);
         this.moduleUri = encodeURI(docUrl.concat(modulePath));
     }
     projectQPI() {
