@@ -254,8 +254,16 @@ class LoogleHitItem implements vscode.QuickPickItem {
     
     constructor(hitObject : HitObject) {
         this.label = hitObject.name;
-        this.description = ":: ".concat(hitObject.type); 
-        this.detail = `Module : ${hitObject.module}`;//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
+        this.description = ":: ".concat(hitObject.type);
+        let shouldModule = vscode.workspace.getConfiguration().get("loogle-lean.showModuleName"); 
+        console.log(shouldModule);
+        if(shouldModule === true) {
+            this.detail = `Module : ${hitObject.module}`;//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
+        }
+        else {
+            this.detail = "   ";//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
+        }
+        
         let buttonDocs = {
             iconPath: new vscode.ThemeIcon('link-external'),
             tooltip : docButtonToolTip
