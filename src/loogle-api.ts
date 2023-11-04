@@ -29,7 +29,7 @@ export function showLoogleSearchBar(context: vscode.ExtensionContext) {
                 return;	
             }
             else {
-                vscode.window.showInformationMessage("Querying Loogle! Give me some time");
+                //vscode.window.showInformationMessage("Querying Loogle! Give me some time");
                 let response = callLoogle(context, query);
                 //console.log(response);
             }
