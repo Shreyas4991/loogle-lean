@@ -138,6 +138,7 @@ function showHitOptions(
                 showLoogleSearchBar(context);
             }
         });
+        
         let buttonItemDisp = quickpick.onDidTriggerItemButton((event) => {
             let item = event.item.label;            
             if(event.button.tooltip === insertButtonToolTip) {
@@ -253,7 +254,7 @@ class LoogleHitItem implements vscode.QuickPickItem {
     constructor(hitObject : HitObject) {
         this.label = hitObject.name;
         this.description = ":: ".concat(hitObject.type); 
-        this.detail = "   ";//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
+        this.detail = `Module : ${hitObject.module}`;//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
         let buttonDocs = {
             iconPath: new vscode.ThemeIcon('link-external'),
             tooltip : docButtonToolTip
@@ -301,7 +302,6 @@ function getSuggestionList (suggestions: string []) : LoogleErrorSuggestion[] {
     }
     else if (suggestions.length <= 1) {
         vscode.window.showErrorMessage("The search term yielded no results and there were no alternative suggestions. Try again");
-    
         return [];
     } else {
         let countEntries = 0;

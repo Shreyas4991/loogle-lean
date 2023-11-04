@@ -17,12 +17,21 @@
     "commands": [
       {
         "command": "loogle-lean.loogle",
-        "title": "Loogle",
-        "category": "Lean Loogle",
+        "title": "Loogle Search",
+        "category": "Lean 4",
         "shortTitle": "Search lean with loogle",
         "icon" :  "$(search)"
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "loogle-lean.loogle",
+          "icon" : "$(search)",
+          "group": "navigation"
+        }
+      ]
+    },
     "keybindings" : [
       {
         "key": "Ctrl+Shift+L",
