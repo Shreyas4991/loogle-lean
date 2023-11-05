@@ -36,13 +36,15 @@ export function showLoogleSearchBar(context: vscode.ExtensionContext) {
             
         });
 }
-export async function callLoogle(context: vscode.ExtensionContext, query : String) {
+export async function callLoogle(context: vscode.ExtensionContext, query : string) {
     console.log(`log: Loogle called with query ${query}`);
-    const loogleURL = 'https://loogle.lean-lang.org/';
-    const queryWhiteSpaceRemoved = query.replace(/\s+/g, '+');
-    const queryURL = loogleURL + 'json?q='+queryWhiteSpaceRemoved;
+    const loogleURL : string = 'https://loogle.lean-lang.org/';
+    const queryWhiteSpaceRemoved = query.replace(/\s+/g, '');
+    const queryURL = loogleURL
+        .concat('json?q=')
+        .concat(encodeURIComponent(query));
     const loogleResponsePromise = fetch(queryURL);
-
+    console.log(queryURL);
     /*let quickPickOpts : vscode.QuickPickOptions = {
         title: hitMenuTitle, 
         canPickMany : false,

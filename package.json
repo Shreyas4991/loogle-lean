@@ -2,7 +2,7 @@
   "name": "loogle-lean",
   "displayName": "Loogle Lean",
   "description": "This extension implements support for using loogle inside vscode in any lean file",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "url": "https://github.com/Shreyas4991/loogle-lean/"
   },
