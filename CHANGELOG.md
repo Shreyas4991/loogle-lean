@@ -4,6 +4,10 @@ All notable changes to the "Loogle Lean" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.05]
+
+- Fixed some query formatting issues and responses for hits
+
 ## [0.04]
 
 - Fixed a URI encoding error

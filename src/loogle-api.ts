@@ -75,7 +75,14 @@ function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
                     placeHolder: "Filter through the hits"
                 };
                 console.log('hit!!');
-                let quickpick = showHitOptions(context, hitMenuTitle, loogleHitList,quickPickOpts);
+                if(typeof loogleHitList === `undefined` || loogleHitList.length === 0) {
+                    vscode.window.showErrorMessage("This search query did not return any hits. Please try again.")
+                    showLoogleSearchBar(context);
+                }
+                else {
+                    let quickpick = showHitOptions(context, hitMenuTitle, loogleHitList,quickPickOpts);
+                }
+                
                 
             }
             else if ('error' in message) {
