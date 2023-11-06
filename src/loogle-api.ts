@@ -1,25 +1,68 @@
 import * as vscode from 'vscode';
+import * as https from 'node:https';
+
 import fetch from 'node-fetch';
 
 const hitMenuTitle = "Loogle Hits Found";
 const suggestionsMenuTitle = "Loogle Suggests";
 const loogleSearchBarTitle = "Loogle Search";
 const zulipLinkBugs = "https://leanprover.zulipchat.com";
-const mathlibDocsURI = "https://leanprover-community.github.io/mathlib4_docs/";
 const insertButtonToolTip = 'Insert the term at the cursor location';
 const copyButtonToolTip = 'Copy the term to the clipboard';
 const docButtonToolTip = 'Open the docs page of the definition';
 
 
-export function showLoogleSearchBar(context: vscode.ExtensionContext) {
+export function showLoogleSearchBar(context: vscode.ExtensionContext, initialContent?: string) {
     let options : vscode.InputBoxOptions = {
         prompt : "Type in your Loogle Query", 
         title: loogleSearchBarTitle,
         placeHolder: "Loogle Search"
     };
-    let inputBox = vscode.window.showInputBox(options);
+    let inputBox = vscode.window.createInputBox();
+    inputBox.prompt = options.prompt;
+    inputBox.title = options.title;
+    inputBox.placeholder = "Loogle Search";
+    if(typeof initialContent !== 'undefined') {
+        inputBox.value = initialContent;
+    }
 
-    inputBox.then((query) => {
+    inputBox.show();
+    loogleSearchBarResponse(context, inputBox);
+}
+
+export async function callLoogle(
+    context: vscode.ExtensionContext, 
+    query : string) {
+
+    console.log(`log: Loogle called with query ${query}`);
+    const loogleURL : string = 'https://loogle.lean-lang.org/';
+    const queryWhiteSpaceRemoved = query.replace(/\s+/g, '');
+    const queryURL = loogleURL
+        .concat('json?q=')
+        .concat(encodeURIComponent(query));
+
+    let fetchOptions = {
+        headers : {
+            "User-Agent" : `vscode ${vscode.version} loogle-lean ${context.extension.packageJSON.version}`
+        }
+    };
+    const loogleResponsePromise = fetch(queryURL,fetchOptions);
+    console.log(queryURL);
+    /*let quickPickOpts : vscode.QuickPickOptions = {
+        title: hitMenuTitle, 
+        canPickMany : false,
+        placeHolder: "Filter through the responses"
+    };*/
+    //showNextOptions(context, hitMenuTitle, [], quickPickOpts);
+    return loogleResponsePromise;
+}
+
+
+function loogleSearchBarResponse(
+    context : vscode.ExtensionContext, 
+    inputBox : vscode.InputBox) {
+    let response = inputBox.onDidAccept(() =>{
+        let query = inputBox.value;
             if (typeof query === 'undefined') {
                 console.log("No query given");
                 return;
@@ -31,34 +74,26 @@ export function showLoogleSearchBar(context: vscode.ExtensionContext) {
             else {
                 //vscode.window.showInformationMessage("Querying Loogle! Give me some time");
                 let response = callLoogle(context, query);
+                //insert loading image here
+                
+                response.then(async (message) => {
+                    let mjson = await (message.json());
+                    console.log(mjson);
+                    inputBox.hide();
+                    processLoogleJSON(context, query, mjson);
+                });
                 //console.log(response);
             }
-            
-        });
-}
-export async function callLoogle(context: vscode.ExtensionContext, query : string) {
-    console.log(`log: Loogle called with query ${query}`);
-    const loogleURL : string = 'https://loogle.lean-lang.org/';
-    const queryWhiteSpaceRemoved = query.replace(/\s+/g, '');
-    const queryURL = loogleURL
-        .concat('json?q=')
-        .concat(encodeURIComponent(query));
-    const loogleResponsePromise = fetch(queryURL);
-    console.log(queryURL);
-    /*let quickPickOpts : vscode.QuickPickOptions = {
-        title: hitMenuTitle, 
-        canPickMany : false,
-        placeHolder: "Filter through the responses"
-    };*/
-    //showNextOptions(context, hitMenuTitle, [], quickPickOpts);
-    
-    const response = (await loogleResponsePromise).json();
-    response.then((message) => {
-        processLoogleJSON(context,message);
-    });
+        }
+    );
 }
 
-function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
+
+
+function processLoogleJSON(
+    context: vscode.ExtensionContext, 
+    query: string,
+    message: any) {
 
     if (typeof message === 'undefined') {
         vscode.window.showInformationMessage("Lean Loogle server cannot be reached"); 
@@ -76,11 +111,11 @@ function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
                 };
                 console.log('hit!!');
                 if(typeof loogleHitList === `undefined` || loogleHitList.length === 0) {
-                    vscode.window.showErrorMessage("This search query did not return any hits. Please try again.")
-                    showLoogleSearchBar(context);
+                    vscode.window.showErrorMessage("This search query did not return any hits. Please try again.");
+                    showLoogleSearchBar(context, query);
                 }
                 else {
-                    let quickpick = showHitOptions(context, hitMenuTitle, loogleHitList,quickPickOpts);
+                    let quickpick = showHitOptions(context, hitMenuTitle, query, loogleHitList,quickPickOpts);
                 }
                 
                 
@@ -92,12 +127,13 @@ function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
                     canPickMany : false,
                     placeHolder : "Filter the suggestions"
                 };
-                if(typeof suggestionList === `undefined` || suggestionList.length <= 1) {
-                    showLoogleSearchBar(context);
+                if(typeof suggestionList === `undefined` || suggestionList.length < 1) {
+                    vscode.window.showErrorMessage("This search query did not return any hits or suggestions. Please try again.");
+                    showLoogleSearchBar(context, query);
                 }
                 else 
                 {
-                    let quickpick = showSuggestionOptions(context, suggestionsMenuTitle, suggestionList, quickPickOpts);
+                    let quickpick = showSuggestionOptions(context, suggestionsMenuTitle, query, suggestionList, quickPickOpts);
                 }
             }
             else {
@@ -105,11 +141,7 @@ function processLoogleJSON(context: vscode.ExtensionContext, message: any) {
             }
             
         }
-    }
-    
-}
-function handleSuggestion(context: vscode.ExtensionContext, suggestion : string) {
-    callLoogle(context, suggestion);
+    }    
 }
 
 
@@ -117,6 +149,7 @@ function handleSuggestion(context: vscode.ExtensionContext, suggestion : string)
 function showHitOptions(
     context : vscode.ExtensionContext, 
     title : string, 
+    query : string,
     hitList : LoogleHit[], 
     options : vscode.QuickPickOptions) {
     
@@ -124,7 +157,7 @@ function showHitOptions(
         let quickpick = vscode.window.createQuickPick();
         quickpick.items = hitList.map((hit) => {return hit.projectQPI();});
         quickpick.placeholder = options.placeHolder;
-        
+        quickpick.value = query;
         let urls: any= {};
         for (const hit of hitList) {
             urls[hit.quickPickItem.label] = hit.moduleUri;
@@ -136,6 +169,7 @@ function showHitOptions(
         quickpick.title = title;
 
         let backbutton = vscode.QuickInputButtons.Back;
+        //backbutton.tooltip = "Go back";
         quickpick.buttons = [backbutton];
         
         let acceptDisp = quickpick.onDidAccept((event) => {
@@ -145,7 +179,7 @@ function showHitOptions(
         });
         let buttonBack = quickpick.onDidTriggerButton((button) => {
             if(button === vscode.QuickInputButtons.Back) {
-                showLoogleSearchBar(context);
+                showLoogleSearchBar(context, quickpick.value);
             }
         });
         
@@ -198,6 +232,7 @@ function insertOrCopy(item: string, module: string, quickpick : vscode.QuickPick
 function showSuggestionOptions(
     context : vscode.ExtensionContext,  
     title : string, 
+    query : string,
     suggestList : vscode.QuickPickItem[], 
     options : vscode.QuickPickOptions) {
     
@@ -205,6 +240,7 @@ function showSuggestionOptions(
         quickpick.items = suggestList;
         quickpick.title = title;
         quickpick.placeholder = options.placeHolder;
+        quickpick.value = query;
         
 
         let backbutton = vscode.QuickInputButtons.Back;
@@ -217,13 +253,21 @@ function showSuggestionOptions(
 
         let buttonBack = quickpick.onDidTriggerButton((button) => {
             if(button === vscode.QuickInputButtons.Back) {
-                showLoogleSearchBar(context);
+                showLoogleSearchBar(context, quickpick.value);
             }
         });
         quickpick.show();
         context.subscriptions.push(acceptDisp);
         context.subscriptions.push(buttonBack);
         return quickpick;
+}
+
+function handleSuggestion(context: vscode.ExtensionContext, suggestion : string) {
+    let response = callLoogle(context, suggestion);
+    response.then(async (message) => {
+        let mjson = await (message.json());
+        processLoogleJSON(context, suggestion, mjson);
+    });
 }
 
 interface HitObject {
@@ -330,6 +374,7 @@ function getSuggestionList (suggestions: string []) : LoogleErrorSuggestion[] {
             }
             countEntries += 1;            
         }
+        console.log(`getSuggestionList: else case: ${itemList[0].label}`);
     }
     return itemList;
 }
