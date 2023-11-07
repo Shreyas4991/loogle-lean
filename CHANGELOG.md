@@ -4,6 +4,11 @@ All notable changes to the "Loogle Lean" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.07]
+- Fixed a pseudo-bug that caused no hits to appear because there were too few and they were being filtered out by the search term itself
+- Added animation for searching. This is useful during long searches.
+- Reorganised the code more meaningfully.
+- Improved the title and placeholder of the hits and suggestions pickers.
 
 ## [0.06]
 
