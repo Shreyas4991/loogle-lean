@@ -31,11 +31,11 @@ function loogleSearchBarResponse(
     let response = inputBox.onDidAccept(() =>{
         let query = inputBox.value;
             if (typeof query === 'undefined') {
-                console.log("No query given");
+                console.log(constants.noQueryEnteredYetErr);
                 return;
             }
             else if (query.trimStart() === '') {
-                vscode.window.showErrorMessage("You haven't typed in any query yet");
+                vscode.window.showErrorMessage(constants.noQueryEnteredYetErr);
                 return;	
             }
             else {
@@ -83,7 +83,7 @@ function processLoogleJSON(
                 };
                 console.log('hit!!');
                 if(typeof loogleHitList === `undefined` || loogleHitList.length === 0) {
-                    vscode.window.showErrorMessage("This search query did not return any hits. Please try again.");
+                    vscode.window.showErrorMessage(constants.cantFindHitsOrSuggestionsErr);
                     showLoogleSearchBar(context, query);
                 }
                 else {
@@ -100,7 +100,7 @@ function processLoogleJSON(
                     placeHolder : "Filter the suggestions"
                 };
                 if(typeof suggestionList === `undefined` || suggestionList.length < 1) {
-                    vscode.window.showErrorMessage("This search query did not return any hits or suggestions. Please try again.");
+                    vscode.window.showErrorMessage(constants.cantFindHitsOrSuggestionsErr);
                     showLoogleSearchBar(context, query);
                 }
                 else 
@@ -128,8 +128,9 @@ function showHitOptions(
         
         let quickpick = vscode.window.createQuickPick();
         quickpick.items = hitList.map((hit) => {return hit.projectQPI();});
+        console.log(`showHitOptions : ${quickpick.items.length}`);
         quickpick.placeholder = options.placeHolder;
-        quickpick.value = query;
+        //quickpick.value = query;
         let urls: any= {};
         for (const hit of hitList) {
             urls[hit.quickPickItem.label] = hit.moduleUri;
@@ -151,7 +152,7 @@ function showHitOptions(
         });
         let buttonBack = quickpick.onDidTriggerButton((button) => {
             if(button === vscode.QuickInputButtons.Back) {
-                showLoogleSearchBar(context, quickpick.value);
+                showLoogleSearchBar(context, query);
             }
         });
         
@@ -212,7 +213,7 @@ function showSuggestionOptions(
         quickpick.items = suggestList;
         quickpick.title = title;
         quickpick.placeholder = options.placeHolder;
-        quickpick.value = query;
+        //quickpick.value = query;
         
 
         let backbutton = vscode.QuickInputButtons.Back;
@@ -225,7 +226,7 @@ function showSuggestionOptions(
 
         let buttonBack = quickpick.onDidTriggerButton((button) => {
             if(button === vscode.QuickInputButtons.Back) {
-                showLoogleSearchBar(context, quickpick.value);
+                showLoogleSearchBar(context, query);
             }
         });
         quickpick.show();
