@@ -79,7 +79,7 @@ function processLoogleJSON(
                 let loogleHitList = loogleAPI.getHitList(message.hits);
                 let quickPickOpts : vscode.QuickPickOptions = {
                     canPickMany : false,
-                    placeHolder: "Filter through the hits"
+                    placeHolder: "Filter through the hits. Hit Alt + ← to go back and try another term"
                 };
                 console.log('hit!!');
                 if(typeof loogleHitList === `undefined` || loogleHitList.length === 0) {
@@ -87,7 +87,15 @@ function processLoogleJSON(
                     showLoogleSearchBar(context, query);
                 }
                 else {
-                    let quickpick = showHitOptions(context, constants.hitMenuTitle, query, loogleHitList,quickPickOpts);
+                    let hitTitle : string;
+                    let hitCount = loogleHitList.length;
+                    if(hitCount == 1) {
+                        hitTitle = `${hitCount} ${constants.hitMenuSingularTitle}.`;
+                    } 
+                    else {
+                        hitTitle = `${loogleHitList.length} ${constants.hitMenuTitle}`;
+                    }
+                    let quickpick = showHitOptions(context, hitTitle, query, loogleHitList,quickPickOpts);
                 }
                 
                 
@@ -97,7 +105,7 @@ function processLoogleJSON(
                 console.log("ERROR!! " + message.error);
                 let quickPickOpts : vscode.QuickPickOptions = {
                     canPickMany : false,
-                    placeHolder : "Filter the suggestions"
+                    placeHolder : "Choose one of the suggestions, or Hit Alt + ← to go back and try another term"
                 };
                 if(typeof suggestionList === `undefined` || suggestionList.length < 1) {
                     vscode.window.showErrorMessage(constants.cantFindHitsOrSuggestionsErr);
