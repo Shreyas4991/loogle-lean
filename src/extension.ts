@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as loogleAPI from './loogle-api';
+import * as loogleInterface from './loogle-interface';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -14,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let loogleDisposable = vscode.commands.registerCommand('loogle-lean.loogle', () => {
 		
 		let i = 0;
-		loogleAPI.showLoogleSearchBar(context);
+		loogleInterface.showLoogleSearchBar(context);
 		let myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 		myStatusBarItem.command = `loogle-lean.loogle`;
 	});
