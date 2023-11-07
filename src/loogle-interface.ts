@@ -91,7 +91,7 @@ function processLoogleJSON(
                 else {
                     let hitTitle : string;
                     let hitCount = loogleHitList.length;
-                    if(hitCount == 1) {
+                    if(hitCount === 1) {
                         hitTitle = `${hitCount} ${constants.hitMenuSingularTitle}.`;
                     } 
                     else {
