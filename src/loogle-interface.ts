@@ -79,7 +79,9 @@ function processLoogleJSON(
                 let loogleHitList = loogleAPI.getHitList(message.hits);
                 let quickPickOpts : vscode.QuickPickOptions = {
                     canPickMany : false,
-                    placeHolder: "Filter through the hits. Hit Alt + ← to go back and try another term"
+                    placeHolder: "Filter through the hits. Hit Alt + ← to go back and try another term",
+                    matchOnDescription: true,
+                    matchOnDetail : true
                 };
                 console.log('hit!!');
                 if(typeof loogleHitList === `undefined` || loogleHitList.length === 0) {
@@ -138,6 +140,9 @@ function showHitOptions(
         quickpick.items = hitList.map((hit) => {return hit.projectQPI();});
         console.log(`showHitOptions : ${quickpick.items.length}`);
         quickpick.placeholder = options.placeHolder;
+        quickpick.matchOnDescription = options.matchOnDescription || true;
+        quickpick.matchOnDetail = options.matchOnDetail || true;
+
         //quickpick.value = query;
         let urls: any= {};
         for (const hit of hitList) {
