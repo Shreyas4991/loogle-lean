@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 
 
 export async function callLoogle(
-    context: vscode.ExtensionContext, 
+    context: vscode.ExtensionContext,
     query : string) {
 
     console.log(`log: Loogle called with query ${query}`);
@@ -24,7 +24,7 @@ export async function callLoogle(
     const loogleResponsePromise = fetch(queryURL,fetchOptions);
     console.log(queryURL);
     /*let quickPickOpts : vscode.QuickPickOptions = {
-        title: hitMenuTitle, 
+        title: hitMenuTitle,
         canPickMany : false,
         placeHolder: "Filter through the responses"
     };*/
@@ -67,11 +67,11 @@ export class LoogleHitItem implements vscode.QuickPickItem {
     description : string;
     detail: string;
     buttons : vscode.QuickInputButton[];
-    
+
     constructor(hitObject : HitObject) {
         this.label = hitObject.name;
         this.description = ":: ".concat(hitObject.type);
-        let shouldModule = vscode.workspace.getConfiguration().get("loogle-lean.showModuleName"); 
+        let shouldModule = vscode.workspace.getConfiguration().get("loogle-lean.showModuleName");
         console.log(shouldModule);
         if(shouldModule === true) {
             this.detail = `Module : ${hitObject.module}`;//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
@@ -79,7 +79,7 @@ export class LoogleHitItem implements vscode.QuickPickItem {
         else {
             this.detail = "   ";//`${moduleName} $(link-external-16)`;//(${moduleUri})`);
         }
-        
+
         let buttonDocs = {
             iconPath: new vscode.ThemeIcon('link-external'),
             tooltip : constants.docButtonToolTip
@@ -93,7 +93,7 @@ export class LoogleHitItem implements vscode.QuickPickItem {
             tooltip : constants.insertButtonToolTip
         };
         this.buttons = [buttonInsert, buttonCopytoClipboard, buttonDocs];
-        
+
     }
 }
 
@@ -116,7 +116,7 @@ export class LoogleErrorSuggestion implements vscode.QuickPickItem {
     label : string;
     constructor(suggestion : string) {
         this.label = suggestion;
-    } 
+    }
 }
 
 export function getSuggestionList (suggestions: string []) : LoogleErrorSuggestion[] {
@@ -133,7 +133,7 @@ export function getSuggestionList (suggestions: string []) : LoogleErrorSuggesti
                 let quickPickEntry = new LoogleErrorSuggestion(entry);
                 itemList.push(quickPickEntry);
             }
-            countEntries += 1;            
+            countEntries += 1;
         }
         console.log(`getSuggestionList: else case: ${itemList[0].label}`);
     }
