@@ -18,6 +18,7 @@ export async function callLoogle(
 
     let fetchOptions = {
         headers : {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             "User-Agent" : `vscode ${vscode.version} loogle-lean ${context.extension.packageJSON.version}`
         }
     };
