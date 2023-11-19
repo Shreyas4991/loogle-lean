@@ -6,7 +6,7 @@ import * as constants from './constants';
 
 export function showLoogleSearchBar(context: vscode.ExtensionContext, initialContent?: string) {
     let options : vscode.InputBoxOptions = {
-        prompt : "Type in your Loogle Query", 
+        prompt : "Type in your Loogle Query",
         title: constants.loogleSearchBarTitle,
         placeHolder: "Loogle Search"
     };
@@ -26,7 +26,7 @@ export function showLoogleSearchBar(context: vscode.ExtensionContext, initialCon
 
 
 function loogleSearchBarResponse(
-    context : vscode.ExtensionContext, 
+    context : vscode.ExtensionContext,
     inputBox : vscode.InputBox) {
     let response = inputBox.onDidAccept(() =>{
         let query = inputBox.value;
@@ -36,7 +36,7 @@ function loogleSearchBarResponse(
             }
             else if (query.trimStart() === '') {
                 vscode.window.showErrorMessage(constants.noQueryEnteredYetErr);
-                return;	
+                return;
             }
             else {
                 //vscode.window.showInformationMessage("Querying Loogle! Give me some time");
@@ -47,7 +47,7 @@ function loogleSearchBarResponse(
                 inputBox.buttons = [loadingButton];
                 let response = loogleAPI.callLoogle(context, query);
                 //insert loading image here
-                
+
                 response.then(async (message) => {
                     let mjson = await (message.json());
                     console.log(mjson);
@@ -63,17 +63,17 @@ function loogleSearchBarResponse(
 
 
 function processLoogleJSON(
-    context: vscode.ExtensionContext, 
+    context: vscode.ExtensionContext,
     query: string,
     message: any) {
 
     if (typeof message === 'undefined') {
-        vscode.window.showInformationMessage("Lean Loogle server cannot be reached"); 
+        vscode.window.showInformationMessage("Lean Loogle server cannot be reached");
     }
     else {
         if (message === null) {
             vscode.window.showInformationMessage("no response from loogle");
-        } 
+        }
         else {
             if ('hits' in message) {
                 let loogleHitList = loogleAPI.getHitList(message.hits);
@@ -93,14 +93,14 @@ function processLoogleJSON(
                     let hitCount = loogleHitList.length;
                     if(hitCount === 1) {
                         hitTitle = `${hitCount} ${constants.hitMenuSingularTitle}.`;
-                    } 
+                    }
                     else {
                         hitTitle = `${loogleHitList.length} ${constants.hitMenuTitle}`;
                     }
                     let quickpick = showHitOptions(context, hitTitle, query, loogleHitList,quickPickOpts);
                 }
-                
-                
+
+
             }
             else if ('error' in message) {
                 let suggestionList = loogleAPI.getSuggestionList(message.suggestions);
@@ -113,7 +113,7 @@ function processLoogleJSON(
                     vscode.window.showErrorMessage(constants.cantFindHitsOrSuggestionsErr);
                     showLoogleSearchBar(context, query);
                 }
-                else 
+                else
                 {
                     let quickpick = showSuggestionOptions(context, constants.suggestionsMenuTitle, query, suggestionList, quickPickOpts);
                 }
@@ -121,21 +121,21 @@ function processLoogleJSON(
             else {
                 vscode.window.showErrorMessage(`If you are seeing this message, there was an error in the loogle API's response. Contact us on the [Zulip Server](${constants.zulipLinkBugs})`);
             }
-            
+
         }
-    }    
+    }
 }
 
 
 
 function showHitOptions(
-    context : vscode.ExtensionContext, 
-    title : string, 
+    context : vscode.ExtensionContext,
+    title : string,
     query : string,
-    hitList : loogleAPI.LoogleHit[], 
+    hitList : loogleAPI.LoogleHit[],
     options : vscode.QuickPickOptions) {
-    
-        
+
+
         let quickpick = vscode.window.createQuickPick();
         quickpick.items = hitList.map((hit) => {return hit.projectQPI();});
         console.log(`showHitOptions : ${quickpick.items.length}`);
@@ -157,7 +157,7 @@ function showHitOptions(
         let backbutton = vscode.QuickInputButtons.Back;
         //backbutton.tooltip = "Go back";
         quickpick.buttons = [backbutton];
-        
+
         let acceptDisp = quickpick.onDidAccept((event) => {
             let activeItem = quickpick.activeItems[0];
             console.log("QuickPick: " + quickpick.title);
@@ -168,9 +168,9 @@ function showHitOptions(
                 showLoogleSearchBar(context, query);
             }
         });
-        
+
         let buttonItemDisp = quickpick.onDidTriggerItemButton((event) => {
-            let item = event.item.label;            
+            let item = event.item.label;
             if(event.button.tooltip === constants.insertButtonToolTip) {
                 insertOrCopy(item, modules[item], quickpick);
             }
@@ -178,7 +178,7 @@ function showHitOptions(
                 vscode.window.showInformationMessage(`Copied ${item} to clipboard`);
                 vscode.env.clipboard.writeText(item);
                 quickpick.hide();
-            } 
+            }
             else if (event.button.tooltip === constants.docButtonToolTip) {
                 //vscode.window.showInformationMessage(`Going to open ${urls[item]} in an external browser`);
                 quickpick.hide();
@@ -203,7 +203,7 @@ function insertOrCopy(item: string, module: string, quickpick : vscode.QuickPick
     if (typeof editor === 'undefined') {
         console.log('No active editor found. Copying item to clipboard');
         vscode.window.showInformationMessage(`Copied ${item} to clipboard`);
-        vscode.env.clipboard.writeText(item);   
+        vscode.env.clipboard.writeText(item);
     }
     else {
         let activePosition = editor.selection.active;
@@ -216,18 +216,18 @@ function insertOrCopy(item: string, module: string, quickpick : vscode.QuickPick
 }
 
 function showSuggestionOptions(
-    context : vscode.ExtensionContext,  
-    title : string, 
+    context : vscode.ExtensionContext,
+    title : string,
     query : string,
-    suggestList : vscode.QuickPickItem[], 
+    suggestList : vscode.QuickPickItem[],
     options : vscode.QuickPickOptions) {
-    
+
         let quickpick = vscode.window.createQuickPick();
         quickpick.items = suggestList;
         quickpick.title = title;
         quickpick.placeholder = options.placeHolder;
         //quickpick.value = query;
-        
+
 
         let backbutton = vscode.QuickInputButtons.Back;
         quickpick.buttons = [backbutton];
@@ -249,7 +249,7 @@ function showSuggestionOptions(
 }
 
 function handleSuggestion(
-    context: vscode.ExtensionContext, 
+    context: vscode.ExtensionContext,
     suggestion : string,
     suggestionQuickPick: vscode.QuickPick<vscode.QuickPickItem>) {
     let loadingButton = {

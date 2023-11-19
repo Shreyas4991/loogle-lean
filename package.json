@@ -50,9 +50,9 @@
     },
     "keybindings" : [
       {
-        "key": "Ctrl+Shift+L",
+        "key": "ctrl+shift+l",
         "command": "loogle-lean.loogle",
-        "mac": "Cmd+Shift+L"
+        "mac": "cmd+shift+l"
       }
     ]
   },
