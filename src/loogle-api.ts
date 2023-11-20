@@ -48,14 +48,14 @@ export interface HitDBInterface {
 
 
 export class LoogleHit {
-    quickPickItem : vscode.QuickPickItem;
+    quickPickItem : LoogleHitItem;
     moduleUri : string;
     moduleName : string;
     constructor(hitObject: HitObject) {
         let docUrl : string = "https://leanprover-community.github.io/mathlib4_docs/";
         this.quickPickItem = new LoogleHitItem(hitObject);
         this.moduleName = hitObject.module;
-        let modulePath = this.moduleName.replace(/\./g,'/').concat('.html').concat(`#${this.moduleName}`);
+        let modulePath = this.moduleName.replace(/\./g,'/').concat('.html').concat(`#${this.quickPickItem.label}`);
         this.moduleUri = encodeURI(docUrl.concat(modulePath));
     }
     projectQPI() {
