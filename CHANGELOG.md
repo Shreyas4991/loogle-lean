@@ -4,6 +4,10 @@ All notable changes to the "Loogle Lean" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.08]
+- Fixed the documentation link which now leads directly to the definition on the corresponding mathlib4_docs page.
+
+
 ## [0.07]
 - Fixed a pseudo-bug that caused no hits to appear because there were too few and they were being filtered out by the search term itself
 - Added animation for searching. This is useful during long searches.
