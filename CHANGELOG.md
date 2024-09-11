@@ -4,6 +4,9 @@ All notable changes to the "Loogle Lean" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.09]
+- Dependency updates because github flagged vulnerabilities
+
 ## [0.08]
 - Fixed the documentation link which now leads directly to the definition on the corresponding mathlib4_docs page.
 

@@ -1,4 +1,4 @@
-# Loogle Lean (Early Preview)
+# Loogle Lean
 
 This extension is a vscode front end for accessing [loogle](https://loogle.lean-lang.org/)
 
